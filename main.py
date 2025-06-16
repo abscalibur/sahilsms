@@ -35,9 +35,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-
-
-
 async def get_session() -> AsyncSession:
     async with database.AsyncSessionLocal() as session:
         yield session
@@ -45,20 +42,6 @@ async def get_session() -> AsyncSession:
 async def is_user_admin(user_id: int, session: AsyncSession):
     res = await session.execute(select(models.AdminUser).where(models.AdminUser.user_id == user_id))
     return res.scalar_one_or_none() is not None
-
-async def require_admin(
-    current_user: str = Depends(auth.get_current_user),
-    session: AsyncSession =Depends(get_session)
-):
-    user_result = await session.execute(select(models.User).where(models.User.name == current_user))
-    user = user_result.scalar_one_or_none()
-    if not user:
-        raise HTTPException(status_code=401, detail="User not found")
-    admin_result = await session.execute(select(models.AdminUser).where(models.AdminUser.user_id == user.id))
-    admin = admin_result.scalar_one_or_none()
-    if not admin:
-        raise HTTPException(status_code=403, detail="Admin only")
-    return user
 
 async def deduct_balance(user_id: int, amount: float, session):
     user_result = await session.execute(select(models.User).where(models.User.id == user_id))
@@ -83,7 +66,6 @@ async def set_sms_account_status(sms_account_id: int, works: bool, session):
 async def set_sms_account_status_route(
     cred_id: int,
     works: bool = True,
-    admin_user: models.User = Depends(require_admin),
     session: AsyncSession = Depends(get_session)
 ):
     try:
@@ -114,7 +96,7 @@ async def send_sms_batch_task():
 
         for userx in users:
             user_id = userx.id
-            logger.info("user selected"+str(user_id))
+            logger.info("user selected "+str(user_id))
             # 2. Get all unsent phone numbers for this user
             phones_result = await session.execute(
                 select(PhoneNumber).where(
