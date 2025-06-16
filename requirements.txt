@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+sqlalchemy
+aiosqlite
+requests
+httpx
+passlib[bcrypt]
+python-jose[cryptography]
+bcrypt==4.0.1
+apscheduler
+python-multipart
+jinja2
+itsdangerous
