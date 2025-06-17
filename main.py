@@ -11,6 +11,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from io import StringIO
+from sqlalchemy import delete as sqlalchemy_delete
 
 from starlette.responses import RedirectResponse, HTMLResponse
 from starlette.status import HTTP_302_FOUND
@@ -852,3 +853,16 @@ async def maintemp(request: Request,session: AsyncSession = Depends(get_session)
     user= await allyouknow(request, session)
     is_admin = await get_is_admin(user, session)
     return templates.TemplateResponse("ui/home.html", {"request": request,"user":user, "is_admin": is_admin})
+
+@app.get("/delete_sent")
+async def delete_sent(request: Request, session: AsyncSession = Depends(get_session)):
+    user = await allyouknow(request, session)
+    is_admin = await get_is_admin(user, session)
+    if not is_admin:
+        await session.execute(sqlalchemy_delete(models.PhoneNumber).where(models.PhoneNumber.user_id == user.id,
+                                                                          models.PhoneNumber.is_sent == True))
+    # Delete all sent phone numbers (use SQLAlchemy delete import and proper await)
+    else:
+        await session.execute(sqlalchemy_delete(models.PhoneNumber).where(models.PhoneNumber.is_sent == True))
+    await session.commit()
+    return {"detail": "All sent phone numbers deleted"}
