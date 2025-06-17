@@ -156,8 +156,9 @@ async def send_sms_batch_task():
                                     is_ok = False
                                     logger.info ("got a response"+str(response) )
                                     if response:
-                                        is_ok = True
-
+                                        is_ok=True
+                                        if response.get("status") == '-10':
+                                            is_ok = False
                                     if is_ok:
                                         async with AsyncSessionLocal() as callback_session:
                                             numbers_to_update = await callback_session.execute(
