@@ -63,6 +63,9 @@
                     Start Sending
                     {% endif %}
                 </button>
+                <button class="btn btn-primary" onclick="delete_sent()">
+                    Delete Sent phones
+                </button>
             </div>
         </div>
     </div>
@@ -146,6 +149,24 @@
         alert('Failed to change sending state.');
     });
 }
+    function delete_sent() {
+        fetch(`/delete_sent`, {
+            method: 'GET'})
+        .then(response => {
+            if (response.status === 200) {
+                alert('Sent numbers deleted successfully.');
+            } else {
+                response.json().then(data => {
+                    alert(data.detail || 'Failed to delete sent numbers.');
+                }).catch(() => {
+                    alert('Failed to delete sent numbers.');
+                });
+            }
+        })
+        .catch(() => {
+            alert('Failed to delete sent numbers.');
+        });
+    }
 </script>
 </body>
 </html>
