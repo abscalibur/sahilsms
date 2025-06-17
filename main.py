@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from io import StringIO
 from sqlalchemy import delete as sqlalchemy_delete
+from sqlalchemy.orm import defer
 
 from starlette.responses import RedirectResponse, HTMLResponse
 from starlette.status import HTTP_302_FOUND
@@ -89,7 +90,9 @@ async def is_acceptable_cost(user_id: int, cost: float, session) -> bool:
 async def send_sms_batch_task():
     async with AsyncSessionLocal() as session:
         # get all users
-        users=await session.execute(select(User))
+        users=await session.execute(select(User).where(
+            User.is_sending == True
+        ))
         users = users.scalars().all()
 
         if not len(users):
@@ -866,3 +869,12 @@ async def delete_sent(request: Request, session: AsyncSession = Depends(get_sess
         await session.execute(sqlalchemy_delete(models.PhoneNumber).where(models.PhoneNumber.is_sent == True))
     await session.commit()
     return {"detail": "All sent phone numbers deleted"}
+
+@app.get("/toggle_sending")
+async def toggle_sending(request: Request, session: AsyncSession = Depends(get_session)):
+    user = await allyouknow(request, session)
+    # Toggle sending status
+    user.is_sending = not user.is_sending
+    await session.merge(user)  # Use merge to update the user object
+    await session.commit()
+    return {"is_sending": user.is_sending}

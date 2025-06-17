@@ -51,6 +51,21 @@
             <img src="https://img.icons8.com/ios-filled/150/4a90e2/sms.png" alt="SMS Icon" class="img-fluid mb-2" style="max-height:120px;">
         </div>
     </div>
+    <div class="row mt-3 mb-4">
+        <div class="col">
+            <div class="btn-group">
+                <button class="btn {{ 'btn-success' if user.is_sending else 'btn-danger' }}"
+                        onclick="toggle_sending()"
+                        id="toggleSendingButton">
+                    {% if user.is_sending %}
+                    Stop Sending
+                    {% else %}
+                    Start Sending
+                    {% endif %}
+                </button>
+            </div>
+        </div>
+    </div>
 
     <div class="row">
         <div class="col-lg-4 mb-3">
@@ -112,5 +127,25 @@
         </div>
     </div>
 </div>
+<script>
+    function toggle_sending() {
+    fetch(`/toggle_sending`, {
+        method: 'GET'})
+    .then(response => {
+        if (response.status === 200) {
+            location.reload();
+        } else {
+            response.json().then(data => {
+                alert(data.detail || 'Failed to change sending state.');
+            }).catch(() => {
+                alert('Failed to change sending state.');
+            });
+        }
+    })
+    .catch(() => {
+        alert('Failed to change sending state.');
+    });
+}
+</script>
 </body>
 </html>
