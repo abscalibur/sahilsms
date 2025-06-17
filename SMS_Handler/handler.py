@@ -29,6 +29,21 @@ class AsyncOnBukaClient:
         }
         return headers
 
+    async def get_balance(self) -> Optional[Dict[str, Any]]:
+        """
+        Fetches the balance of the SMS account.
+        """
+        url = f"{self.base_url}/getBalance"
+        params = {"appId": self.appid}
+        async with httpx.AsyncClient() as client:
+            try:
+                rsp = await client.get(url, params=params, headers=self.create_headers())
+                rsp.raise_for_status()
+                return rsp.json()
+            except httpx.HTTPError as e:
+                print(f"Error fetching balance: {e}")
+                return None
+
     async def send_sms(
         self,
         message: str,

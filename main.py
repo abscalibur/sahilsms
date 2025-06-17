@@ -788,6 +788,20 @@ async def ui_templates(request: Request, session: AsyncSession = Depends(get_ses
         {"request": request, "user": user, "is_admin": is_admin, "data": data}
     )
 
+async def getbalance(api_key: str, api_pwd: str, appid: str):
+    client=AsyncOnBukaClient(
+        api_key=api_key,
+        api_pwd=api_pwd,
+        appid=appid
+    )
+    try:
+        balance = await client.get_balance()
+        return balance
+    except Exception as e:
+        logger.error(f"Failed to get balance: {e}")
+        return 'No Balance'
+    pass
+
 @app.get("/ui/creds")
 async def ui_creds(request: Request,session: AsyncSession = Depends(get_session)):
     user = await allyouknow(request, session)
@@ -805,6 +819,7 @@ async def ui_creds(request: Request,session: AsyncSession = Depends(get_session)
             "api_key": c.api_key,
             "api_pwd": c.api_pwd,
             "appid": c.appid,
+            "balance": await getbalance(c.api_key, c.api_pwd, c.appid),
             "still_works": "Yes" if c.still_works else "No"
         })
     return templates.TemplateResponse("ui/creds.html", {"request": request,"user":user, "is_admin": is_admin, "data": data})
