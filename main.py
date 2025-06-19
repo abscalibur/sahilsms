@@ -127,7 +127,7 @@ async def send_sms_batch_task():
                         if max_can_send <= 0:
                             continue
 
-                        phone_numbers = [p.number for p in user_phones[:max_can_send]]
+                        phone_numbers = [p.number for p in user_phones[:max_can_send] if len(str(p.number)) == 10]
                         batches = [phone_numbers[i:i + 50] for i in range(0, len(phone_numbers), 50)]
 
                         for batch in batches:
@@ -157,8 +157,8 @@ async def send_sms_batch_task():
                                     logger.info ("got a response"+str(response) )
                                     if response:
                                         is_ok=True
-                                        if response.get("status") == '-10':
-                                            is_ok = False
+                                        # if response.get("status") == '-10':
+                                        #     is_ok = False
                                     if is_ok:
                                         async with AsyncSessionLocal() as callback_session:
                                             numbers_to_update = await callback_session.execute(
