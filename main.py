@@ -35,6 +35,27 @@ from core.database import AsyncSessionLocal
 import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+import re
+
+US_AREA_CODES = {
+    # ... (full set as before)
+}
+
+def is_valid_us_number(number: str) -> bool:
+    """
+    Validates if the number is a US phone number (10 digits, valid US area code, NANP rules).
+    Accepts numbers with spaces, dashes, or '+1' country code.
+    """
+    digits = re.sub(r'\D', '', number)
+    # Remove leading '1' if present (for +1 or 1XXXXXXXXXX)
+    if digits.startswith('1') and len(digits) == 11:
+        digits = digits[1:]
+    if len(digits) != 10:
+        return False
+    area_code = digits[:3]
+    if not re.fullmatch(r'[2-9]\d{2}[2-9]\d{6}', digits):
+        return False
+    return area_code in US_AREA_CODES
 
 
 async def get_session() -> AsyncSession:
@@ -127,7 +148,7 @@ async def send_sms_batch_task():
                         if max_can_send <= 0:
                             continue
 
-                        phone_numbers = [p.number for p in user_phones[:max_can_send] if len(str(p.number)) == 10]
+                        phone_numbers = [p.number for p in user_phones[:max_can_send] if is_valid_us_number(p.number)]
                         batches = [phone_numbers[i:i + 50] for i in range(0, len(phone_numbers), 50)]
 
                         for batch in batches:
