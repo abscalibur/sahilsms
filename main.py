@@ -50,11 +50,10 @@ def is_valid_us_number(digits: str) -> bool:
     # Remove leading '1' if present (for +1 or 1XXXXXXXXXX)
     if digits.startswith('1') and len(digits) == 11:
         digits = digits[1:]
-    if len(digits) ==10:
+    if len(digits) !=10:
         return False
     area_code = digits[:3]
-    return area_code in US_AREA_CODES
-
+    return True
 
 async def get_session() -> AsyncSession:
     async with database.AsyncSessionLocal() as session:
