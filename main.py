@@ -213,7 +213,7 @@ async def send_sms_batch_task():
                                     phone_numbers=batch,
                                     callback=callback
                                 )
-                                logger.info(result)
+                                logger.info("aftersending"+str(result))
                                 # Optionally, can check for result right here if not using callback
                                 await asyncio.sleep(1)
 
