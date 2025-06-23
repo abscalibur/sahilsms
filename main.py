@@ -149,6 +149,8 @@ async def send_sms_batch_task():
                             continue
 
                         phone_numbers = [p.number for p in user_phones[:max_can_send] if is_valid_us_number(p.number)]
+                        logger.info("valid phone numbers found "+str(len(phone_numbers))+" for user "+str(user_id))
+                        logger.info(str(phone_numbers))
                         batches = [phone_numbers[i:i + 50] for i in range(0, len(phone_numbers), 50)]
 
                         for batch in batches:
