@@ -53,8 +53,6 @@ def is_valid_us_number(number: str) -> bool:
     if len(digits) != 10:
         return False
     area_code = digits[:3]
-    if not re.fullmatch(r'[2-9]\d{2}[2-9]\d{6}', digits):
-        return False
     return area_code in US_AREA_CODES
 
 
